@@ -89,8 +89,8 @@ namespace QuickstartFlightTickets
             departureAirport.CountryCode = "IE";
             departureAirport.Timezone = "Europe/London";
 
-            Console.WriteLine("Departure airport created" + departureAirport);
             flightsStub.createPort(departureAirport);
+            Console.WriteLine("Departure airport created" + departureAirport);
 
             //Creates arrival airport
             Console.WriteLine("Creating arrival airport");
@@ -102,8 +102,8 @@ namespace QuickstartFlightTickets
             arrivalAirport.CountryCode = "HK";
             arrivalAirport.Timezone = "Asia/Hong_Kong";
 
-            Console.WriteLine("Arrival airport created" + arrivalAirport);
             flightsStub.createPort(arrivalAirport);
+            Console.WriteLine("Arrival airport created" + arrivalAirport);
 
         }
 
@@ -115,8 +115,8 @@ namespace QuickstartFlightTickets
             carrier.IataCarrierCode = "YY";
             carrier.PassTypeIdentifier = appleCertificate;
 
-            Console.WriteLine("Carrier created" + carrier);
             flightsStub.createCarrier(carrier);
+            Console.WriteLine("Carrier created" + carrier);
         }
 
         private void createFlightDesignator()
@@ -138,8 +138,8 @@ namespace QuickstartFlightTickets
             flightDesignator.Origin = "YY4";
             flightDesignator.Destination = "ADP";
             flightDesignator.PassTemplateId = templateId.Id_;
-            Console.WriteLine("Flight designator created " + flightDesignator);
             flightsStub.createFlightDesignator(flightDesignator);
+            Console.WriteLine("Flight designator created " + flightDesignator);
         }
 
         private void createFlight()
@@ -159,8 +159,8 @@ namespace QuickstartFlightTickets
             flight.ScheduledDepartureTime = flightDateTime;
             flight.PassTemplateId = templateId.Id_;
 
-            Console.WriteLine("Created flight" + flight);
             flightsStub.createFlight(flight);
+            Console.WriteLine("Created flight" + flight);
         }
 
         private void createBoardingPass()
