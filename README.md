@@ -12,7 +12,6 @@ This repository has following structure with each purpose.
 * [Examples](#examples)
 * [Documentation](#documentation)
 * [Getting Help](#getting-help)
-* [License](#license)
 
 ## Prerequisites
 1. Create a PassKit account. Sign up for free [HERE](https://app.passkit.com/).
@@ -52,5 +51,3 @@ QuickstartFlights will create a carrier, flight, an arrival airport, a departure
 * Email [support@passkit.com](email:support@passkit.com)
 * [Online chat support](https://passkit.com/)
 
-## License
-Distributed under MIT License. Details available on [license file](#).
