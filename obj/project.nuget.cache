@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "dgSpecHash": "ILmoSk0kFj/fuElxlb5iueF6vszt3YQnE37FIBUkTpsa2qfC2HywwBPFaNujv9tXybgZ5lohUyx5qwrbfEoahA==",
+  "success": true,
+  "projectFilePath": "/Users/claudia/c-sharp-quickstart/c-sharp-quickstart.csproj",
+  "expectedPackageFiles": [
+    "/Users/claudia/.nuget/packages/google.api.commonprotos/2.5.0/google.api.commonprotos.2.5.0.nupkg.sha512",
+    "/Users/claudia/.nuget/packages/google.protobuf/3.19.4/google.protobuf.3.19.4.nupkg.sha512",
+    "/Users/claudia/.nuget/packages/grpc.core/2.45.0/grpc.core.2.45.0.nupkg.sha512",
+    "/Users/claudia/.nuget/packages/grpc.core.api/2.45.0/grpc.core.api.2.45.0.nupkg.sha512",
+    "/Users/claudia/.nuget/packages/passkit.grpc/1.1.61/passkit.grpc.1.1.61.nupkg.sha512",
+    "/Users/claudia/.nuget/packages/system.memory/4.5.3/system.memory.4.5.3.nupkg.sha512"
+  ],
+  "logs": []
+}
