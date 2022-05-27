@@ -27,6 +27,8 @@ namespace QuickstartCoupons
         public static PassKit.Grpc.Id vipCouponId;
         public static PassKit.Grpc.Id baseTemplateId;
         public PassKit.Grpc.Id vipTemplateId;
+        public static String baseEmail = "loyal.larry@dummy.passkit.com"; // Change to your email to receive cards
+        public static String vipEmail = "harry.highroller@dummy.passkit.com"; // Change to your email to receive cards
 
         /*
                 * Quickstart will walk through the following steps:
@@ -45,8 +47,10 @@ namespace QuickstartCoupons
             createCampaign();
             createOffer();
             createCoupon();
+            getSingleCoupon(); //optional
             redeemCoupon(); //optional
-            deleteCampaign();
+            voidCoupon(); //optional
+            deleteCampaign(); //optional
             // always close the channel when there will be no further calls made.
             channel.ShutdownAsync().Wait();
         }
@@ -107,7 +111,7 @@ namespace QuickstartCoupons
             offer.OfferShortTitle = "Base Offer";
             offer.OfferDetails = "Base Offer";
             offer.IssueStartDate = DateTime.UtcNow.ToTimestamp();
-            offer.IssueEndDate = new DateTime(2022, 04, 30).ToUniversalTime().ToTimestamp();
+            offer.IssueEndDate = new DateTime(2022, 06, 30).ToUniversalTime().ToTimestamp();
 
             baseOfferId = couponsStub.createCouponOffer(offer);
             Console.WriteLine("Created base offer, base offer id is " + baseOfferId.Id_);
@@ -132,10 +136,10 @@ namespace QuickstartCoupons
             coupon.OfferId = baseOfferId.Id_;
             coupon.CampaignId = campaignId.Id_;
             coupon.Person = new Person();
-            coupon.Person.Surname = "Smith";
-            coupon.Person.Forename = "Bailey";
-            coupon.Person.DisplayName = "Bailey";
-            coupon.Person.EmailAddress = "claudia@passkit.com"; // set to an email address that can receive mail to receive an enrolment email                                           
+            coupon.Person.Surname = "Loyal";
+            coupon.Person.Forename = "Larry";
+            coupon.Person.DisplayName = "Larry";
+            coupon.Person.EmailAddress = baseEmail; // set to an email address that can receive mail to receive an enrolment email                                           
             coupon.Status = CouponStatus.Unredeemed;
 
             baseCouponId = couponsStub.createCoupon(coupon);
@@ -146,8 +150,8 @@ namespace QuickstartCoupons
             coupon.Person.Surname = "Highroller";
             coupon.Person.Forename = "Harry";
             coupon.Person.DisplayName = "Harry";
-            coupon.Person.EmailAddress = "claudia@passkit.com"; // set to an email address that can receive mail to receive an enrolment
-                                                                // email.
+            coupon.Person.EmailAddress = vipEmail; // set to an email address that can receive mail to receive an enrolment
+                                                   // email.
             vipCouponId = couponsStub.createCoupon(coupon);
             Console.WriteLine("Created vip coupon, vip coupon id is " + vipCouponId.Id_);
 
@@ -155,6 +159,16 @@ namespace QuickstartCoupons
             Console.WriteLine("Base coupon URL: " + "https://pub1.pskt.io/" + baseCouponId.Id_.ToString());
             Console.WriteLine("Vip coupon URL:" + "https://pub1.pskt.io/" + vipCouponId.Id_.ToString());
         }
+
+        private void getSingleCoupon()
+        {
+            // Takes a coupon id and returns that coupon
+            Console.WriteLine("Getting coupon");
+            couponsStub.getCouponById(baseCouponId);
+            Console.WriteLine("Coupon retrieved " + couponsStub.getCouponById(baseCouponId));
+
+        }
+
         private void redeemCoupon()
         {
             // Redeems base coupon, if redeemed pass url will no longer be valid
@@ -164,7 +178,18 @@ namespace QuickstartCoupons
             redeemRequest.CampaignId = campaignId.Id_;
 
             couponsStub.redeemCoupon(redeemRequest);
-            Console.WriteLine("Redeemed coupon " + baseCouponId.Id_);
+            Console.WriteLine("Redeemed coupon " + redeemRequest.Id);
+        }
+
+        private void voidCoupon()
+        {   // Voids vip coupon
+            Console.WriteLine("Voiding coupon");
+            Coupon voidRequest = new Coupon();
+            voidRequest.Id = vipCouponId.Id_;
+            voidRequest.CampaignId = campaignId.Id_;
+
+            couponsStub.voidCoupon(voidRequest);
+            Console.WriteLine("Voided coupon " + voidRequest.Id);
         }
         private void deleteCampaign()
         {
