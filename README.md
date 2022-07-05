@@ -16,7 +16,8 @@ You will need the following:
 - Your PassKit SDK Credentials (available from the [Developer Tools Page](https://app.passkit.com/app/account/developer-tools))
 - Apple wallet certificate id (for flights only, available from the [certificate page](https://app.passkit.com/app/account/certificates))
  ![ScreenShot](images/certificate.png)
-
+- Recommended Code Editor Visual Studio Code [Guide to Installation](https://code.visualstudio.com/docs/setup/setup-overview)
+- If you use Visual Studio Code use this [guide](https://code.visualstudio.com/docs/languages/csharp) to install the necessary extensions
  ### Configuration
 
 1. In the certs folder of the repository add the following three PassKit credential files:
@@ -26,7 +27,8 @@ You will need the following:
     
     You can disregard the key-java.pem credentials file as it is not compatible with C#.
 
-2. Now we need to decrypt your `key.pem`. At your project root directory, run `cd ./certs`  `openssl ec -in key.pem -out key.pem`. Your `key.pem` file should look like below.
+2. Now we need to decrypt your `key.pem`. At your project root directory, run `cd ./certs`  `openssl ec -in key.pem -out key.pem`. Your `key.pem` file should look like below. If you are in your root directory the terminal should show `PASSKIT-C-SHARP-GRPC-QUICKSTART` to the left of the cursor and then after running the command `certs`, as shown below.
+![ScreenShot](images/directory.png)
    ![ScreenShot](images/decrypted.png)
    If you do not see `Proc-Type: 4,ENCEYPTED` on line 2, you have successfully decrypted `key.pem`.
 
@@ -38,6 +40,7 @@ You will need the following:
 4. Go back to root directory with `cd ../..`. Then run `dotnet run`, to create a sample membership card, coupon card and boarding pass (with default templates & tiers/offers) and issue them.
 
 ## Examples
+All quickstarts are found in the Quickstarts folder.
 ###  Membership Cards
 QuickstartLoyalty will create a membership program with 2 tiers, base and VIP.  It will enrol two members, one in each tier.
 It contains the methods:
