@@ -37,7 +37,7 @@ You will need the following:
     and lines 30 and 31 in QuickstartCoupons for coupons.
     ![ScreenShot](images/coupon-email.png)
 
-4. Go back to root directory with `cd ../..`. Then run `dotnet run`, to create a sample membership card, coupon card and boarding pass (with default templates & tiers/offers) and issue them.
+4. Go back to root directory with `cd ../`. Then run `dotnet run`, to create a sample membership card, coupon card and boarding pass (with default templates & tiers/offers) and issue them.
 
 ## Examples
 All quickstarts are found in the Quickstarts folder.
