@@ -18,6 +18,8 @@ You will need the following:
  ![ScreenShot](images/certificate.png)
 - Recommended Code Editor Visual Studio Code [Guide to Installation](https://code.visualstudio.com/docs/setup/setup-overview)
 - If you use Visual Studio Code use this [guide](https://code.visualstudio.com/docs/languages/csharp) to install the necessary extensions
+- .NET v6.0 [Guide to Installation](https://dotnet.microsoft.com/en-us/download/dotnet/6.0) (please note: should you be installing this in Mac if may come up as malicious software despite being from Microsoft. The way to fix this is shown in the configuration)
+
  ### Configuration
 
 1. In the certs folder of the repository add the following three PassKit credential files:
@@ -38,6 +40,13 @@ You will need the following:
     ![ScreenShot](images/coupon-email.png)
 
 4. Go back to root directory with `cd ../`. Then run `dotnet run`, to create a sample membership card, coupon card and boarding pass (with default templates & tiers/offers) and issue them.
+
+5. Mac users only - After configuring the quickstart should you encounter the error, navigate to system preferences and select security and privacy.
+![ScreenShot](images/preferences.png)
+Then navigate to general.
+![ScreenShot](images/security.png)
+In general, underneath App Store and identified developers the file that is being flagged as malicious will be shown. Allow it to run and the quickstart should run smoothly, you may need to repeat the process a couple of times for the other files involved in .Net.
+![ScreenShot](images/general.png)
 
 ## Examples
 All quickstarts are found in the Quickstarts folder.
