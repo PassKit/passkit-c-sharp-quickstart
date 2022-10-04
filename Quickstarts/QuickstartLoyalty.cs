@@ -26,6 +26,8 @@ namespace QuickstartLoyalty
         public static PassKit.Grpc.Id vipMemberId;
         public static PassKit.Grpc.Id baseTemplateId;
         public static PassKit.Grpc.Id vipTemplateId;
+        public static String baseEmail = "loyal.larry@dummy.passkit.com"; // Change to your email to receive cards
+        public static String vipEmail = "harry.highroller@dummy.passkit.com"; // Change to your email to receive cards
 
         /*
                 * Quickstart will walk through the following steps:
@@ -50,7 +52,8 @@ namespace QuickstartLoyalty
             checkInMember(); //optional
             checkOutMember();  //optional
             addPoints(); //optional
-            deleteProgram();
+            burnPoints(); //optional
+            deleteProgram(); //optional
             // always close the channel when there will be no further calls made.
             channel.ShutdownAsync().Wait();
 
@@ -134,10 +137,10 @@ namespace QuickstartLoyalty
             member.TierId = baseTierId.Id_;
             member.ProgramId = programId.Id_;
             member.Person = new Person();
-            member.Person.Surname = "Smith";
-            member.Person.Forename = "Bailey";
-            member.Person.DisplayName = "Bailey";
-            member.Person.EmailAddress = "claudia@passkit.com";
+            member.Person.Surname = "Loyal";
+            member.Person.Forename = "Larry";
+            member.Person.DisplayName = "Larry";
+            member.Person.EmailAddress = baseEmail;
             member.Points = 0;
 
             baseMemberId = membersStub.enrolMember(member);
@@ -150,7 +153,7 @@ namespace QuickstartLoyalty
             member.Person.Surname = "Highroller";
             member.Person.Forename = "Harry";
             member.Person.DisplayName = "Harry";
-            member.Person.EmailAddress = "claudia@passkit.com";  // set to an email address that can receive mail to receive an enrolment email.
+            member.Person.EmailAddress = vipEmail;  // set to an email address that can receive mail to receive an enrolment email.
 
             vipMemberId = membersStub.enrolMember(member);
             Console.WriteLine("Enrolled member on vip tier, member id is " + vipMemberId.Id_);
@@ -206,6 +209,18 @@ namespace QuickstartLoyalty
             var memberPoints = membersStub.earnPoints(request);
             Console.WriteLine("Added " + memberPoints.Points.ToString() + " points to member");
 
+        }
+
+        private void burnPoints()
+        {
+            // Burns points of a base member
+            Console.WriteLine("Burning points of a member ");
+            EarnBurnPointsRequest request = new EarnBurnPointsRequest();
+            request.Id = baseMemberId.Id_;
+            request.Points = 10;
+
+            var memberPoints = membersStub.burnPoints(request);
+            Console.WriteLine("Burned " + memberPoints.Points.ToString() + " points of a member");
         }
 
         private void deleteProgram()

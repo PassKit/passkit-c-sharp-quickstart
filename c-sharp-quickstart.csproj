@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="PassKit.Grpc" Version="1.1.61" />
+    <PackageReference Include="PassKit.Grpc" Version="1.1.70" />
   </ItemGroup>
 
 </Project>

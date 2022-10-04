@@ -43,7 +43,7 @@ namespace QuickstartFlightTickets
         {
             createStubs(channel);
             createTemplates();
-            //createCarrier();
+            createCarrier();
             createAirports();
             createFlight();
             createFlightDesignator();
