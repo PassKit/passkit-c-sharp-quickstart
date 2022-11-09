@@ -7,4 +7,4 @@ build_property.InvariantGlobalization =
 build_property.PlatformNeutralAssembly = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = c_sharp_quickstart
-build_property.ProjectDir = /Users/claudia/c-sharp-quickstart/
+build_property.ProjectDir = /Users/claudia/Documents/GitHub/passkit-c-sharp-quickstart/
