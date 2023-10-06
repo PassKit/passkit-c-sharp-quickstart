@@ -12,3 +12,7 @@ buildCoupons.Quickstart(channel);
 // Flight Quickstart
 QuickstartFlightTickets.FlightTickets buildFlights = new QuickstartFlightTickets.FlightTickets();
 buildFlights.QuickStart(channel);
+
+// Event Tickets Quickstart
+QuickstartEventickets.EventTicket buildEventTickets = new QuickstartEventickets.EventTicket();
+buildEventTickets.QuickStart(channel);

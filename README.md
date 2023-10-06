@@ -94,10 +94,25 @@ It contains the methods:
 After running `dotnet run` the terminal should show:
 ![ScreenShot](images/flights.png)
 
+### Event Tickets
+QuickstartEventTickets will create a venue, production, an event, a ticket type, issue a ticket, validate a ticket and redeem a ticket. 
+- createTemplate() - creates the pass template for event tickets
+- createVenue() - creates a venue for the event 
+- createProduction() - takes a new production name and creates a new production
+- createTicketType() - takes templateId , from previous method, to use as base template and the productionId, created from previous method, and creates a new ticketType 
+- createEvent() - takes productionId and venueId ,from previous method, and creates a new Event
+- issueEventTicket() - takes ticketTypeId and  eventId, from previous method, and customer details creates a event ticket, and sends a welcome email to deliver event ticket url
+- validateTicket() - takes an existing ticket number as well as other details and validates it
+- redeemTicket() - takes an existing ticket number and redeems the event ticket associate with it
+
+After running `dotnet run` the terminal should show:
+![ScreenShot](images/eventtickets.png)
+
 ## Documentation
 * [PassKit Membership Official Documentation](https://docs.passkit.io/protocols/member)
 * [PassKit Coupons Official Documentation](https://docs.passkit.io/protocols/coupon)
 * [PassKit Boarding Passes Official Documentation](https://docs.passkit.io/protocols/boarding)
+* [PassKit Event Tickets Official Documentation](https://docs.passkit.io/protocols/event-tickets/)
 
 
 ## Getting Help
