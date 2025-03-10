@@ -51,6 +51,9 @@ Then navigate to general.
 In general, underneath App Store and identified developers the file that is being flagged as malicious will be shown. Allow it to run and the quickstart should run smoothly, you may need to repeat the process a couple of times for the other files involved in .Net.
 ![ScreenShot](images/general.png)
 
+
+Please make sure to check the API region of your account [here](https://app.passkit.com/app/account/developer-tools) and change it accordingly in the `GrpcConnection.cs`, for Europe/Pub1 use `host = "grpc.pub1.passkit.io"` and for USA/Pub2 use `host = "grpc.pub2.passkit.io"`.
+
 ## Examples
 All quickstarts are found in the Quickstarts folder.
 ### GRPC Connection
