@@ -40,7 +40,7 @@ namespace QuickstartCoupons
                 * - Redeem a coupon
                 * - Deletes campaign
                 */
-        public void Quickstart(Channel channel)
+        public void Quickstart(Grpc.Core.Channel channel)
         {
             createStubs(channel);
             createTemplate();
@@ -54,7 +54,7 @@ namespace QuickstartCoupons
             // always close the channel when there will be no further calls made.
             channel.ShutdownAsync().Wait();
         }
-        private void createStubs(Channel channel)
+        private void createStubs(Grpc.Core.Channel channel)
         {
             templatesStub = new Templates.TemplatesClient(channel);
             couponsStub = new SingleUseCoupons.SingleUseCouponsClient(channel);
@@ -111,7 +111,7 @@ namespace QuickstartCoupons
             offer.OfferShortTitle = "Base Offer";
             offer.OfferDetails = "Base Offer";
             offer.IssueStartDate = DateTime.UtcNow.ToTimestamp();
-            offer.IssueEndDate = new DateTime(2022, 06, 30).ToUniversalTime().ToTimestamp();
+            offer.IssueEndDate = new DateTime(2025, 06, 30).ToUniversalTime().ToTimestamp();
 
             baseOfferId = couponsStub.createCouponOffer(offer);
             Console.WriteLine("Created base offer, base offer id is " + baseOfferId.Id_);

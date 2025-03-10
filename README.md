@@ -19,6 +19,7 @@ You will need the following:
 - Recommended Code Editor Visual Studio Code [Guide to Installation](https://code.visualstudio.com/docs/setup/setup-overview)
 - If you use Visual Studio Code use this [guide](https://code.visualstudio.com/docs/languages/csharp) to install the necessary extensions
 - .NET v6.0 [Guide to Installation](https://dotnet.microsoft.com/en-us/download/dotnet/6.0) (please note: should you be installing this in Mac if may come up as malicious software despite being from Microsoft. The way to fix this is shown in the configuration)
+- Your [SDK Host and Port](https://help.passkit.com/en/articles/10720707-sdk-and-api-configuration-settings), you may need to update this in the `GrpcConnection.cs` or `GrpcConnectionPooling.cs` depending on which server you signed up on
 
  ### Configuration
 
@@ -39,9 +40,11 @@ You will need the following:
     and lines 30 and 31 in QuickstartCoupons for coupons.
     ![ScreenShot](images/coupon-email.png)
 
-4. Go back to root directory with `cd ../`. Then run `dotnet run`, to create a sample membership card, coupon card and boarding pass (with default templates & tiers/offers) and issue them.
+4. Go back to root directory with `cd ../`. Then run `dotnet restore` to download any missing dependencies, followed by `dotnet build` to compile the project.
 
-5. Mac users only - After configuring the quickstart should you encounter the error, navigate to system preferences and select security and privacy.
+5. Finally `dotnet run`, to create a sample membership card, coupon card and boarding pass (with default templates & tiers/offers) and issue them.
+
+6. Mac users only - After configuring the quickstart should you encounter the error, navigate to system preferences and select security and privacy.
 ![ScreenShot](images/preferences.png)
 Then navigate to general.
 ![ScreenShot](images/security.png)
@@ -50,6 +53,12 @@ In general, underneath App Store and identified developers the file that is bein
 
 ## Examples
 All quickstarts are found in the Quickstarts folder.
+### GRPC Connection
+For implementing in your own projects, use the `GrpcConnectionPool` or `GrpcConnection` class to manage connections to the PassKit gRPC endpoints. By default, this quickstart uses gRPC connection pooling to optimize performance and manage multiple requests efficiently. However, if you prefer to use the single-connection method, comment out the pooling line and use the regular connection method line in `Program.cs`
+When to Use Each Mehod:
+- gRPC Connection Pooling (Default) - Recommended for production environments with high concurrency and multiple requests. Improves performance by reusing connections.
+- Single Connection - Useful for simple applications, debugging, or when only a few API calls are needed.
+
 ###  Membership Cards
 QuickstartLoyalty will create a membership program with 2 tiers, base and VIP.  It will enrol two members, one in each tier.
 It contains the methods:

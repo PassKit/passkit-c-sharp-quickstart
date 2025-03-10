@@ -39,7 +39,7 @@ namespace QuickstartFlightTickets
         public static PassKit.Grpc.Id templateId;
         public static BoardingPassesResponse pass;
 
-        public void QuickStart(Channel channel)
+        public void QuickStart(Grpc.Core.Channel channel)
         {
             createStubs(channel);
             createTemplates();
@@ -54,7 +54,7 @@ namespace QuickstartFlightTickets
 
         }
 
-        private void createStubs(Channel channel)
+        private void createStubs(Grpc.Core.Channel channel)
         {
             templatesStub = new Templates.TemplatesClient(channel);
             flightsStub = new Flights.FlightsClient(channel);

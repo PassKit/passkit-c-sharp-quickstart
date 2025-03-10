@@ -26,6 +26,7 @@ namespace QuickstartLoyalty
         public static PassKit.Grpc.Id vipMemberId;
         public static PassKit.Grpc.Id baseTemplateId;
         public static PassKit.Grpc.Id vipTemplateId;
+        public static String externalId = "12345";
         public static String baseEmail = "loyal.larry@dummy.passkit.com"; // Change to your email to receive cards
         public static String vipEmail = "harry.highroller@dummy.passkit.com"; // Change to your email to receive cards
 
@@ -42,13 +43,14 @@ namespace QuickstartLoyalty
                 *- Add loyalty points to a member
                 *- Delete all membership assets
                 */
-        public void Quickstart(Channel channel)
+        public void Quickstart(Grpc.Core.Channel channel)
         {
             createStubs(channel);
             createTemplate();
             createProgram();
             createTier();
             enrolMember();
+            getMemberByExternalId();
             checkInMember(); //optional
             checkOutMember();  //optional
             addPoints(); //optional
@@ -59,7 +61,7 @@ namespace QuickstartLoyalty
 
 
         }
-        private void createStubs(Channel channel)
+        private void createStubs(Grpc.Core.Channel channel)
         {
             templatesStub = new Templates.TemplatesClient(channel);
             membersStub = new Members.MembersClient(channel);
@@ -149,6 +151,7 @@ namespace QuickstartLoyalty
             // Enrolls member on vip tier
             Console.WriteLine("Enrolling member on vip tier");
             member.TierId = vipTierId.Id_;
+            member.ExternalId = externalId;
             member.Points = 9999;
             member.Person.Surname = "Highroller";
             member.Person.Forename = "Harry";
@@ -232,6 +235,28 @@ namespace QuickstartLoyalty
 
             membersStub.deleteProgram(deleteProgramId);
             Console.WriteLine("Deleted program ");
+        }
+
+        private void getMemberByExternalId()
+        {
+            Console.WriteLine("Getting member by external Id");
+            try
+            {
+                MemberRecordByExternalIdRequest memberRequest = new() { ProgramId = programId.Id_, ExternalId = externalId };
+
+                var member = membersStub.getMemberRecordByExternalId(memberRequest);
+                if (member != null)
+                {
+                    Console.WriteLine("Found Member: " + member);
+                }
+                else
+                {
+                    Console.WriteLine("Member Not Found");
+                }
+            }
+            catch (Exception ex)
+            { Console.WriteLine(ex.ToString()); }
+
         }
     }
 }

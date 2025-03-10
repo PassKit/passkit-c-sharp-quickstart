@@ -1,0 +1,16 @@
+
+bin/
+obj/
+certs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.csproj.user
+
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+.idea/
+.vscode/

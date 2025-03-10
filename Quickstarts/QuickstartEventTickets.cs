@@ -43,7 +43,7 @@ namespace QuickstartEventickets
         public static PassKit.Grpc.Id ticketTypeId;
         public static PassKit.Grpc.Id pass;
 
-        public void QuickStart(Channel channel)
+        public void QuickStart(Grpc.Core.Channel channel)
         {
             createStubs(channel);
             createTemplate();
@@ -59,7 +59,7 @@ namespace QuickstartEventickets
 
         }
 
-        private void createStubs(Channel channel)
+        private void createStubs(Grpc.Core.Channel channel)
         {
             templatesStub = new Templates.TemplatesClient(channel);
             eventsStub = new EventTickets.EventTicketsClient(channel);
@@ -168,7 +168,10 @@ namespace QuickstartEventickets
 
             pass = eventsStub.issueTicket(ticket);
             Console.WriteLine("Event ticket created, event ticket url: https://pub1.pskt.io/" + pass.Id_);
+
         }
+
+
 
         private void validateTicket()
         {
