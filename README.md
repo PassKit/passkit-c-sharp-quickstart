@@ -6,7 +6,7 @@ PassKit C# Quickstart
 
 ### Overview
 
-This quickstart aims to help  get C# developers up and running with the PassKit SDK as quickly as possible.
+This quickstart aims to help get C# developers up and running with the PassKit SDK as quickly as possible.
 
 ### Prerequisites
 
@@ -42,7 +42,7 @@ You will need the following:
 
     You should now have a client.pfx file.  Create a `certs` folder in the root of the project and copy this file there e.g. `certs/client.pfx`
 
-3. Edit the `Quickstarts/Constants.cs` file to set your region (For Europe, use pub1 and for US, use pub2).  If you wish to use the Flights quickstart, you will also need to have uploaded an Apple Pass Certificate to your account and supply the PassTypeId (e.g. `pass.com.passkit.quickstart`).  If you want to receive welcom emails for coupons, loyalty and event tickets, then provide a valid email address.
+3. Edit the `Quickstarts/Constants.cs` file to set your region (For Europe, use pub1 and for US, use pub2).  If you wish to use the Flights quickstart, you will also need to have uploaded an Apple Pass Certificate to your account and supply the PassTypeId (e.g. `pass.com.passkit.quickstart`).  If you want to receive welcome emails for coupons, loyalty, and event tickets, provide a valid email address.
 
 4. In the root poriject directory run `dotnet restore` to download any missing dependencies, followed by `dotnet build` to compile the project.
 
@@ -52,7 +52,7 @@ You will need the following:
 > You will receive some compiler warnings about unreachable code. This happens because of conditional checks on whether constants for the Apple Certificate or Email Address have been provided.  They can be safely ignored.
 
 > [!NOTE]
-> The out of the box configuration will pause after each set of tests for you to examine the output.  Pressing Escape at each stage will delete the assets that have been created.  We recommend doing this, particularly for boarding passes where there are restrictions on multiple Carrier, Airport, Flight Designator, and Flight records.
+> The out-of-the-box configuration will pause after each set of tests for you to examine the output.  Pressing Escape at each stage will delete the assets that have been created.  We recommend doing this, particularly for boarding passes where there are restrictions on multiple Carrier, Airport, Flight Designator, and Flight records.
 
 ## Examples
 All quickstarts are found in the Quickstarts folder.
@@ -107,6 +107,7 @@ QuickstartEventTickets will create a venue, production, an event, a ticket type,
 - IssueEventTicket() - takes ticketTypeId and  eventId, from previous method, and customer details creates a event ticket, and sends a welcome email to deliver event ticket url
 - ValidateTicket() - takes an existing ticket number as well as other details and validates it
 - RedeemTicket() - takes an existing ticket number and redeems the event ticket associate with it
+- DeleteEventAssets() - an optional method that deletes the tickerts and event objects recently created
 
 ## Documentation
 * [PassKit Membership Official Documentation](https://docs.passkit.io/protocols/member)
