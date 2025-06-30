@@ -25,3 +25,8 @@ buildCoupons.Quickstart(couponChannel);
 // Event Tickets Quickstart
 QuickstartEventickets.EventTicket buildEventTickets = new();
 buildEventTickets.QuickStart(ticketChannel);
+
+// Cleanly close the connection pool
+Console.WriteLine("Shutting down connection pool");
+GrpcConnectionPool.GrpcConnectionPool.GetInstance().Shutdown();
+Console.WriteLine("Connection pool shut down");

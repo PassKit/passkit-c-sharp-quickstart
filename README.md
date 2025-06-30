@@ -59,9 +59,23 @@ All quickstarts are found in the Quickstarts folder.
 ### GRPC Connection
 For implementing in your own projects, use the `GrpcConnectionPool` or `GrpcConnection` class to manage connections to the PassKit gRPC endpoints. By default, this quickstart uses gRPC connection pooling to optimize performance and manage multiple requests efficiently. However, if you prefer to use the single-connection method, comment out the pooling line and use the regular connection method line in `Program.cs`
 
+> [!NOTE]
+> In production when using `GrpcConnectionPool` you should use `GrpcConnectionPool.GrpcConnectionPool.GetInstance().GetChannel()` to supply one of the pooled channels with each call.
+
 When to Use Each Mehod:
 - gRPC Connection Pooling (Default) - Recommended for production environments with high concurrency and multiple requests. Improves performance by reusing connections.
 - Single Connection - Useful for simple applications, debugging, or when only a few API calls are needed.
+
+### Boarding Passes
+QuickstartFlights will create a carrier, flight, an arrival airport, a departure airport, flight designator and boarding pass for one person travelling with an infant. 
+It contains the methods:
+- CreateTemplate() - creates the pass template for flights and boarding passes
+- CreateCarrier() - takes a new carrier code and creates a new carrier
+- CreateAirports() - takes a new airport code and creates a new airport
+- CreateFlight() - takes templateId from previous method, to use as base template and ustogether with the carrier code and departure date to create a new flight
+- CreateFlightDesignator() - creates flight designator that can be used to produce boarding passes without the need for a flight record, providing the departure date fits within the schedule
+- CreateBoardingPass() - takes flight and customer details to creates boarding passes for the passenger and infant
+- DeleteFlightAssets() - an optional method that deletes the flight objects recently created
 
 ###  Membership Cards
 QuickstartLoyalty will create a membership program with 2 tiers, base and VIP.  It will enrol two members, one in each tier.
@@ -85,17 +99,6 @@ It contains the methods:
 - RedeemCoupon() - an optional method that redeems a coupon that has been made
 - VoidCoupon() - an optional method that voids a coupon that has been made
 - DeleteCampaign() - an optional method that deletes a campaign and any associated offers or coupons
-
-### Boarding Passes
-QuickstartFlights will create a carrier, flight, an arrival airport, a departure airport, flight designator and boarding pass for one person. 
-It contains the methods:
-- CreateTemplate() - creates the pass template for flights and boarding passes
-- CreateCarrier() - takes a new carrier code and creates a new carrier
-- CreateAirports() - takes a new airport code and creates a new airport
-- CreateFlight() - takes templateId , from previous method, to use as base template and uses a carrier code, created from previous method, and creates a new flight
-- CreateFlightDesignator() - creates flight designator using flight code
-- CreateBoardingPass() - takes templateId, from previous method, and customer details creates a new boarding pass, and sends a welcome email to deliver boarding pass url
-- DeleteFlightAssets() - an optional method that deletes the flight objects recently created
 
 ### Event Tickets
 QuickstartEventTickets will create a venue, production, an event, a ticket type, issue a ticket, validate a ticket and redeem a ticket. 
