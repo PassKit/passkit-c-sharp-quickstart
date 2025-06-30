@@ -6,10 +6,17 @@
     <RootNamespace>c_sharp_quickstart</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <RuntimeIdentifiers>osx-arm64</RuntimeIdentifiers>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="PassKit.Grpc" Version="1.1.123" />
+    <PackageReference Include="PassKit.Grpc.DotNet" Version="1.1.142" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="certs/**">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

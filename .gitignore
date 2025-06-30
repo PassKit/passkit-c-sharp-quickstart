@@ -7,10 +7,12 @@ certs/
 *.userosscache
 *.sln.docstates
 *.csproj.user
+*.sln
 
 project.lock.json
 project.fragment.lock.json
 artifacts/
 
 .idea/
+.vs/
 .vscode/

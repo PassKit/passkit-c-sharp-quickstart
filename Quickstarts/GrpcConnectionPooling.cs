@@ -1,24 +1,21 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using Grpc.Core;
+using System.Security.Cryptography.X509Certificates;
+using Grpc.Net.Client;
+using Quickstart.Common;
 
 namespace GrpcConnectionPool
 {
     class GrpcConnectionPool
     {
         private static readonly object _lock = new object();
-        private static GrpcConnectionPool _instance;
-        private readonly List<Channel> _channelPool;
+        private static GrpcConnectionPool? _instance;
+        private readonly List<GrpcChannel> _channelPool;
         private int _currentIndex;
         private readonly int _poolSize;
 
         private GrpcConnectionPool(int poolSize = 5)
         {
             _poolSize = poolSize;
-            _channelPool = new List<Channel>();
+            _channelPool = new List<GrpcChannel>();
 
             for (int i = 0; i < _poolSize; i++)
             {
@@ -41,33 +38,37 @@ namespace GrpcConnectionPool
             return _instance;
         }
 
-        private Channel CreateChannel()
+        private static GrpcChannel CreateChannel()
         {
-            var host = "grpc.pub1.passkit.io";
-            var port = 443;
+            var host = $"https://grpc.{Constants.Environment}.passkit.io";
 
             try
             {
-                var rootCert = File.ReadAllText("certs/ca-chain.pem");
-                var keyFile = File.ReadAllText("certs/key.pem");
-                var certFile = File.ReadAllText("certs/certificate.pem");
+                // Load client cert
+                var clientCert = new X509Certificate2("certs/client.pfx", "", X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.Exportable);
 
-                var keyCertPair = new KeyCertificatePair(certFile, keyFile);
-                var credentials = new SslCredentials(rootCert, keyCertPair);
+                // Create handler for mTLS
+                var handler = new HttpClientHandler();
+                handler.ClientCertificates.Add(clientCert);
+                handler.ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, chain, errors) =>
+                {
+                    // Optional: validate server cert chain manually using `rootCA`
+                    return true;
+                };
 
-                return new Channel(host, port, credentials);
+                var httpClient = new HttpClient(handler);
+                return GrpcChannel.ForAddress(host, new GrpcChannelOptions
+                {
+                    HttpClient = httpClient
+                });
             }
-            catch (IOException e)
+            catch (Exception e)
             {
-                throw new Exception($"Failed to read certificate files: {e.Message}", e);
-            }
-            catch (RpcException e)
-            {
-                throw new RpcException(new Status(e.Status.StatusCode, e.Status.Detail));
+                throw new Exception($"Failed to configure mTLS channel: {e.Message}", e);
             }
         }
 
-        public Channel GetChannel()
+        public GrpcChannel GetChannel()
         {
             lock (_lock)
             {
@@ -83,7 +84,7 @@ namespace GrpcConnectionPool
             {
                 foreach (var channel in _channelPool)
                 {
-                    channel.ShutdownAsync().Wait();
+                    channel.Dispose(); // Dispose is async-safe
                 }
                 _channelPool.Clear();
             }

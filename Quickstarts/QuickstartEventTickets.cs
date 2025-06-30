@@ -1,7 +1,9 @@
-using PassKit.Grpc;
-using PassKit.Grpc.EventTickets;
-using Grpc.Core;
+using Grpc.Net.Client;
+using PassKit.Grpc.DotNet;
+using PassKit.Grpc.DotNet.EventTickets;
 using Google.Protobuf.WellKnownTypes;
+using Quickstart.Common;
+using PassKit.Grpc.DotNet.Members;
 
 /* Quickstart Event Tickets runs through the high level steps required to create event tickets from scratch using the PassKit gRPC C Sharp SDK. 
  */
@@ -9,17 +11,15 @@ namespace QuickstartEventickets
 {
     class EventTicket
     {
-
         /*
          * Stubs are used to access PassKit gRPC Functions. Blocking stubs can process
-         * both unary and streaming server
-         * responses, and therefore can be used with all current SDK methods. You are
-         * free to modify this implementation
+         * both unary and streaming serverresponses, and therefore can be used with all 
+         * current SDK methods. You are free to modify this implementation
          * to add service, async or futures stubs for more efficient operations.
          */
 
-        private static EventTickets.EventTicketsClient eventsStub;
-        private static Templates.TemplatesClient templatesStub;
+        private static EventTickets.EventTicketsClient? eventsStub;
+        private static Templates.TemplatesClient? templatesStub;
 
         /*
          * Quickstart will walk through the following steps:
@@ -35,43 +35,55 @@ namespace QuickstartEventickets
          * 
          */
 
-        // Public objects for testing purposes   public static Image.ImageIds flightImageIds;
-        public static PassKit.Grpc.Id templateId;
-        public static PassKit.Grpc.Id productionId;
-        public static PassKit.Grpc.Id venueId;
-        public static PassKit.Grpc.Id eventId;
-        public static PassKit.Grpc.Id ticketTypeId;
-        public static PassKit.Grpc.Id pass;
+        // Public objects for testing purposes
+        public static Id? templateId;
+        public static Id? productionId;
+        public static Id? venueId;
+        public static Id? eventId;
+        public static Id? ticketTypeId;
+        public static Id? pass;
 
-        public void QuickStart(Grpc.Core.Channel channel)
+        public void QuickStart(GrpcChannel channel)
         {
-            createStubs(channel);
-            createTemplate();
-            createVenue();
-            createProduction();
-            createEvent();
-            createTicketType();
-            issueEventTicket();
-            validateTicket();
-            redeemTicket();
+            CreateStubs(channel);
+            CreateTemplate();
+            CreateVenue();
+            CreateProduction();
+            CreateEvent();
+            CreateTicketType();
+            IssueEventTicket();
+            ValidateTicket();
+            RedeemTicket();
+            Console.WriteLine("Pausing to examine pass output. Press ESC to delete event ticket assets.");
+            do
+            {
+                while (!Console.KeyAvailable)
+                {
+                    // Do nothing
+                }
+            } while (Console.ReadKey(true).Key != ConsoleKey.Escape);
+            DeleteEventAssets();
             // always close the channel when there will be no further calls made.
             channel.ShutdownAsync().Wait();
 
         }
 
-        private void createStubs(Grpc.Core.Channel channel)
+        private static void CreateStubs(GrpcChannel channel)
         {
             templatesStub = new Templates.TemplatesClient(channel);
             eventsStub = new EventTickets.EventTicketsClient(channel);
         }
 
-        private void createTemplate()
-        {// Get default template
+        private static void CreateTemplate()
+        {
+            // Get default template
             Console.WriteLine("Creating template");
-            DefaultTemplateRequest templateRequest = new DefaultTemplateRequest();
-            templateRequest.Protocol = PassProtocol.EventTicketing;
-            templateRequest.Revision = 1;
-            PassTemplate defaultTemplate = templatesStub.getDefaultTemplate(templateRequest);
+            DefaultTemplateRequest templateRequest = new()
+            {
+                Protocol = PassProtocol.EventTicketing,
+                Revision = 1
+            };
+            PassTemplate defaultTemplate = templatesStub!.getDefaultTemplate(templateRequest);
 
             // Modify the default template 
             defaultTemplate.Name = "Quickstart Event Tickets";
@@ -79,136 +91,213 @@ namespace QuickstartEventickets
             defaultTemplate.Timezone = "Europe/London";
 
             templateId = templatesStub.createTemplate(defaultTemplate);
-            Console.WriteLine("Created template, template id is " + templateId.Id_);
+            Console.WriteLine($"Created template, template id is {templateId.Id_}");
         }
 
-        private void createVenue()
+        private static void CreateVenue()
         {
             // Creates venue 
             Console.WriteLine("Creating venue");
-            Venue venue = new Venue();
-            venue.Name = "Quickstart Venue";
-            venue.Address = "123 Abc Street";
-            venue.Timezone = "Europe/London";
+            Venue venue = new()
+            {
+                Name = "Quickstart Venue",
+                Address = "123 Abc Street",
+                Timezone = "Europe/London"
+            };
 
-            venueId = eventsStub.createVenue(venue);
-            Console.WriteLine("Venue created" + venue);
+            venueId = eventsStub?.createVenue(venue);
+            Console.WriteLine($"Venue created {venue.Id}");
         }
 
-        private void createProduction()
-        {  // Creates production
-            Console.WriteLine("Creating Production");
-            Production production = new Production();
-            production.Name = "Quickstart Production";
-            production.FinePrint = "Quickstart Fine Print";
-            production.AutoInvalidateTicketsUponEventEnd = Toggle.On;
-
-            productionId = eventsStub.createProduction(production);
-            Console.WriteLine("Production created" + production);
-        }
-
-        private void createEvent()
+        private static void CreateProduction()
         {
-            DateTime startDate = new DateTime(2023, 12, 12, 12, 0, 0, 0, DateTimeKind.Unspecified);
+            // Creates production
+            Console.WriteLine("Creating Production");
+            Production production = new()
+            {
+                Name = "Quickstart Production",
+                FinePrint = "Quickstart Fine Print",
+                AutoInvalidateTicketsUponEventEnd = Toggle.On
+            };
+
+            productionId = eventsStub?.createProduction(production);
+            Console.WriteLine($"Production created {productionId?.Id_}");
+        }
+
+        private static void CreateEvent()
+        {
+            DateTime startDate = new (2028, 12, 12, 12, 0, 0, 0, DateTimeKind.Local);
             startDate = DateTime.SpecifyKind(startDate, DateTimeKind.Utc);
-            DateTime endDate = new DateTime(2023, 12, 13, 13, 0, 0, 0, DateTimeKind.Unspecified);
+            DateTime endDate = new (2028, 12, 13, 13, 0, 0, 0, DateTimeKind.Local);
             endDate = DateTime.SpecifyKind(endDate, DateTimeKind.Utc);
-            DateTime doorsOpen = new DateTime(2023, 12, 13, 12, 13, 0, 0, DateTimeKind.Unspecified);
+            DateTime doorsOpen = new (2028, 12, 13, 12, 13, 0, 0, DateTimeKind.Local);
             doorsOpen = DateTime.SpecifyKind(doorsOpen, DateTimeKind.Utc);
 
             // Creates event
             Console.WriteLine("Creating Production");
-            Event newEvent = new Event();
-            newEvent.Production = new Production();
-            newEvent.Production.Id = productionId.Id_;
-            newEvent.Venue = new Venue();
-            newEvent.Venue.Id = venueId.Id_;
-            newEvent.ScheduledStartDate = startDate.ToTimestamp();
-            newEvent.DoorsOpen = doorsOpen.ToTimestamp();
-            newEvent.EndDate = endDate.ToTimestamp();
-            newEvent.RelevantDate = startDate.ToTimestamp();
+            Event newEvent = new()
+            {
+                Production = new()
+                {
+                    Id = productionId?.Id_
+                },
+                Venue = new Venue
+                {
+                    Id = venueId?.Id_
+                },
+                ScheduledStartDate = startDate.ToTimestamp(),
+                DoorsOpen = doorsOpen.ToTimestamp(),
+                EndDate = endDate.ToTimestamp(),
+                RelevantDate = startDate.ToTimestamp()
+            };
 
-            eventId = eventsStub.createEvent(newEvent);
-
-            Console.WriteLine("Event created " + newEvent);
+            eventId = eventsStub?.createEvent(newEvent);
+            Console.WriteLine($"Event created {eventId?.Id_}");
 
         }
 
-        private void createTicketType()
-        {// Create Ticket Type
+        private static void CreateTicketType()
+        {
+            // Create Ticket Type
             Console.WriteLine("Creating ticket type");
 
-            TicketType newTicketType = new TicketType();
-            newTicketType.Name = "Quickstart Ticket Type";
-            newTicketType.ProductionId = productionId.Id_;
-            newTicketType.BeforeRedeemPassTemplateId = templateId.Id_;
-            newTicketType.Uid = "";
+            TicketType newTicketType = new()
+            {
+                Name = "Quickstart",
+                ProductionId = productionId?.Id_,
+                BeforeRedeemPassTemplateId = templateId?.Id_,
+                Uid = ""
+            };
 
-            ticketTypeId = eventsStub.createTicketType(newTicketType);
-            Console.WriteLine("Created ticket type" + newTicketType);
+            ticketTypeId = eventsStub?.createTicketType(newTicketType);
+            Console.WriteLine($"Created ticket type {ticketTypeId?.Id_}");
         }
 
-        private void issueEventTicket()
+        private static void IssueEventTicket()
         {
-            DateTime endDate = new DateTime(2023, 12, 13, 13, 0, 0, 0, DateTimeKind.Unspecified);
+            DateTime endDate = new (2028, 12, 13, 13, 0, 0, 0, DateTimeKind.Local);
             endDate = DateTime.SpecifyKind(endDate, DateTimeKind.Utc);
             //Issue event ticket
             Console.WriteLine("Issuing event ticket");
-            IssueTicketRequest ticket = new IssueTicketRequest();
-            ticket.TicketTypeId = ticketTypeId.Id_;
-            ticket.EventId = eventId.Id_;
-            ticket.ExpiryDate = endDate.ToTimestamp();
-            ticket.OrderNumber = "1";
-            ticket.TicketNumber = "1";
-            ticket.Person = new Person();
-            ticket.Person.Surname = "Loyal";
-            ticket.Person.Forename = "Larry";
-            ticket.Person.DisplayName = "Larry";
-            ticket.Person.EmailAddress = "";
+            IssueTicketRequest ticket = new()
+            {
+                TicketTypeId = ticketTypeId?.Id_,
+                EventId = eventId?.Id_,
+                ExpiryDate = endDate.ToTimestamp(),
+                OrderNumber = "1",
+                TicketNumber = "1",
+                Person = new()
+                {
+                    Surname = "Loyal",
+                    Forename = "Larry",
+                    DisplayName = "Larry",
+                }
+            };
+            if (Constants.EmailAddress != "")
+            {
+                ticket.Person.EmailAddress = Constants.EmailAddress;
 
-            pass = eventsStub.issueTicket(ticket);
-            Console.WriteLine("Event ticket created, event ticket url: https://pub1.pskt.io/" + pass.Id_);
+            }
+
+            pass = eventsStub?.issueTicket(ticket);
+            Console.WriteLine($"Event ticket created, event ticket url: https://{Constants.Environment}.pskt.io/{pass?.Id_}");
 
         }
 
 
 
-        private void validateTicket()
+        private static void ValidateTicket()
         {
             DateTime validateDate = DateTime.Now;
             validateDate = DateTime.SpecifyKind(validateDate, DateTimeKind.Utc);
 
             //Validate event ticket
             Console.WriteLine("Validating event ticket");
-            ValidateTicketRequest ticketToValidate = new ValidateTicketRequest();
-            ticketToValidate.MaxNumberOfValidations = 1;
-            ticketToValidate.Ticket = new TicketId();
-            ticketToValidate.Ticket.TicketId_ = pass.Id_;
-            ticketToValidate.ValidateDetails = new ValidateDetails();
-            ticketToValidate.ValidateDetails.ValidateDate = validateDate.ToTimestamp();
+            ValidateTicketRequest ticketToValidate = new()
+            {
+                MaxNumberOfValidations = 1,
+                Ticket = new()
+                {
+                    TicketId_ = pass?.Id_,
+                },
+                ValidateDetails = new()
+                {
+                    ValidateDate = validateDate.ToTimestamp()
+                }
+            };
+            ;
 
 
-            eventsStub.validateTicket(ticketToValidate);
+            eventsStub?.validateTicket(ticketToValidate);
             Console.WriteLine("Event ticket has been validated");
         }
 
-        private void redeemTicket()
+        private static void RedeemTicket()
         {
             DateTime redeemDate = DateTime.Now;
             redeemDate = DateTime.SpecifyKind(redeemDate, DateTimeKind.Utc);
 
             //Redeem event ticket
             Console.WriteLine("Redeeming event ticket");
-            RedeemTicketRequest ticketToRedeem = new RedeemTicketRequest();
-            ticketToRedeem.Ticket = new TicketId();
-            ticketToRedeem.Ticket.TicketId_ = pass.Id_;
-            ticketToRedeem.RedemptionDetails = new RedemptionDetails();
-            ticketToRedeem.RedemptionDetails.RedemptionDate = redeemDate.ToTimestamp();
+            RedeemTicketRequest ticketToRedeem = new()
+            {
+                Ticket = new()
+                {
+                    TicketId_ = pass?.Id_,
 
+                },
+                RedemptionDetails = new()
+                {
+                    RedemptionDate = redeemDate.ToTimestamp()
+                }
 
-            eventsStub.redeemTicket(ticketToRedeem);
+            };
+
+            eventsStub?.redeemTicket(ticketToRedeem);
             Console.WriteLine("Event ticket has been redeemed");
         }
 
+        private static void DeleteEventAssets()
+        {
+            // Delete the event and all associated tickets
+            Console.WriteLine("Deleting event");
+            Event req = new()
+            {
+                Id = eventId?.Id_
+            };
+            eventsStub?.deleteEvent(req);
+            Console.WriteLine("Deleted event");
+
+            // Delete Ticket Type
+            Console.WriteLine("Deleting ticket type");
+            TicketType ticketType = new()
+            {
+                Id = ticketTypeId?.Id_
+            };
+            eventsStub?.deleteTicketType(ticketType);
+
+            // Delete Production
+            Console.WriteLine("Deleting production");
+            Production production = new()
+            {
+                Id = productionId?.Id_
+            };
+            eventsStub?.deleteProduction(production);
+            Console.WriteLine("Deleted production");
+
+            // Delete Production
+            Console.WriteLine("Deleting venue");
+            Venue venue = new()
+            {
+                Id = venueId?.Id_
+            };
+            eventsStub?.deleteVenue(venue);
+            Console.WriteLine("Deleted venue");
+
+            // Delete template
+            Console.WriteLine("Deleting templates");
+            templatesStub!.deleteTemplate(templateId);
+            Console.WriteLine("Deleted templates");
+        }
     }
 }

@@ -1,35 +1,39 @@
-
-using Grpc.Core;
-
+using System.Security.Cryptography.X509Certificates;
+using Grpc.Net.Client;
+using Quickstart.Common;
 
 namespace GrpcConnection
 {
     class GrpcConnection
     {
-
-        private static SslCredentials buildSslCredentials(string host, int port, string rootCert, string keyFile, string certFile)
+        public static GrpcChannel ConnectWithPassKitServer()
         {
-            var keyCertPair = new KeyCertificatePair(certFile, keyFile);
-            return new SslCredentials(rootCert, keyCertPair);
-        }
-
-        public static Channel ConnectWithPassKitServer()
-        {
-            var port = 443;
-            var host = "grpc.pub1.passkit.io";
+            var host = $"https://grpc.{Constants.Environment}.passkit.io"; // HTTPS scheme required
 
             try
             {
-                var rootCert = File.ReadAllText("certs/ca-chain.pem");
-                var keyFile = File.ReadAllText("certs/key.pem");
-                var certFile = File.ReadAllText("certs/certificate.pem");
-                SslCredentials credentials = buildSslCredentials(host, port, rootCert, keyFile, certFile);
-                var channel = new Channel(host, port, credentials);
+                // Load client certificate (requires .pfx file, see note below)
+                var clientCert = new X509Certificate2("certs/client.pfx", "", X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.Exportable);
+
+                // Create HTTP handler with client certificate
+                var handler = new HttpClientHandler();
+                handler.ClientCertificates.Add(clientCert);
+
+                // Optional: Skip server cert validation for local/dev (not recommended in prod)
+                handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+
+                var httpClient = new HttpClient(handler);
+
+                var channel = GrpcChannel.ForAddress(host, new GrpcChannelOptions
+                {
+                    HttpClient = httpClient
+                });
+
                 return channel;
             }
-            catch (RpcException e)
+            catch (Exception e)
             {
-                throw new RpcException(new Status(e.Status.StatusCode, e.Status.Detail));
+                throw new Exception($"Failed to create gRPC channel with mutual TLS: {e.Message}", e);
             }
         }
     }

@@ -1,25 +1,27 @@
 ﻿// Creates channel for connecting to PassKit server
-//Single Connection
-//var channel = GrpcConnection.GrpcConnection.ConnectWithPassKitServer();
-//gRPC Connection Pooling
+// Single Connection (for testing only)
+// var channel = GrpcConnection.GrpcConnection.ConnectWithPassKitServer();
+
+
+
+// gRPC Connection Pooling
 var loyaltyChannel = GrpcConnectionPool.GrpcConnectionPool.GetInstance().GetChannel(); // Get a connection from the pool
 var couponChannel = GrpcConnectionPool.GrpcConnectionPool.GetInstance().GetChannel(); // Get a connection from the pool
 var flightChannel = GrpcConnectionPool.GrpcConnectionPool.GetInstance().GetChannel(); // Get a connection from the pool
 var ticketChannel = GrpcConnectionPool.GrpcConnectionPool.GetInstance().GetChannel(); // Get a connection from the pool
 
+// Flight Quickstart
+QuickstartFlightTickets.FlightTickets buildFlights = new();
+buildFlights.QuickStart(flightChannel);
 
 // Loyalty Quickstart
-QuickstartLoyalty.Membership buildLoyalty = new QuickstartLoyalty.Membership();
+QuickstartLoyalty.Membership buildLoyalty = new();
 buildLoyalty.Quickstart(loyaltyChannel);
 
 // Coupons Quickstart
-QuickstartCoupons.Coupons buildCoupons = new QuickstartCoupons.Coupons();
+QuickstartCoupons.Coupons buildCoupons = new();
 buildCoupons.Quickstart(couponChannel);
 
-// Flight Quickstart
-QuickstartFlightTickets.FlightTickets buildFlights = new QuickstartFlightTickets.FlightTickets();
-buildFlights.QuickStart(flightChannel);
-
 // Event Tickets Quickstart
-QuickstartEventickets.EventTicket buildEventTickets = new QuickstartEventickets.EventTicket();
+QuickstartEventickets.EventTicket buildEventTickets = new();
 buildEventTickets.QuickStart(ticketChannel);
