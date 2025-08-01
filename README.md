@@ -112,6 +112,31 @@ QuickstartEventTickets will create a venue, production, an event, a ticket type,
 - RedeemTicket() - takes an existing ticket number and redeems the event ticket associate with it
 - DeleteEventAssets() - an optional method that deletes the tickerts and event objects recently created
 
+## Running with Docker
+If you prefer not to install the .NET SDK locally, or want to run the quickstart in a containerized environment, you can use the included c-sharp.sh script to build and run everything via Docker.
+
+### Prerequistes
+- [Docker](https://docs.docker.com/get-started/get-docker/) must be installed and running on your machine.
+
+### Setup Steps
+1. Ensure your gRPC credential files are present in the certs/ folder:
+    - certificate.pem
+    - key.pem
+    - ca-chain.pem
+
+2. Edit the Quickstarts/Constants.cs file to set:
+    - The region (pub1 for Europe, pub2 for US)
+    - Your email address (if you'd like to receive passes via email)
+    - The PassTypeIdentifier (for flights)
+
+3. Run the Docker helper script from the root of the project:
+    `./c-sharp.sh`
+    Run the quickstart project inside a container
+    
+4. To clean up the Docker image after execution, use the --clean flag:
+    `./c-sharp.sh --clean`
+
+
 ## Documentation
 * [PassKit Membership Official Documentation](https://docs.passkit.io/protocols/member)
 * [PassKit Coupons Official Documentation](https://docs.passkit.io/protocols/coupon)

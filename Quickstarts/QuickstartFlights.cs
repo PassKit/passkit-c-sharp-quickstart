@@ -2,6 +2,8 @@ using Grpc.Net.Client;
 using PassKit.Grpc.DotNet;
 using PassKit.Grpc.DotNet.Flights;
 using Quickstart.Common;
+using System;
+using System.Threading;
 
 /* Quickstart Flight Tickets runs through the high level steps required to create flight tickets from scratch using the PassKit gRPC Java SDK. 
  */
@@ -58,15 +60,8 @@ namespace QuickstartFlightTickets
             CreateFlight();
             CreateFlightDesignator();
             CreateBoardingPass();
-            Console.WriteLine("Pausing to examine pass output. Press ESC to delete flight assets.");
-            do
-            {
-                while (!Console.KeyAvailable)
-                {
-                    // Do nothing
-                }
-            } while (Console.ReadKey(true).Key != ConsoleKey.Escape);
-            DeleteFlightAssets();
+            Console.WriteLine("Waiting 60 seconds before deleting flights assets...");
+            Thread.Sleep(TimeSpan.FromSeconds(60));
             // always close the channel when there will be no further calls made.
             channel.ShutdownAsync().Wait();
         }
@@ -116,7 +111,7 @@ namespace QuickstartFlightTickets
             Port departureAirport = new()
             {
                 AirportName = "Dublin",
-                CityName =  "Dublin",
+                CityName = "Dublin",
                 IataAirportCode = departureAirportCode,
                 IcaoAirportCode = departureICAOAirportCode,
                 CountryCode = "IE",
@@ -201,7 +196,8 @@ namespace QuickstartFlightTickets
                 PassTemplateId = templateId?.Id_,
                 Schedule = new()
                 {
-                    Monday = new(){
+                    Monday = new()
+                    {
                         ScheduledDepartureTime = departureTime,
                         ScheduledArrivalTime = arrivalTime,
                         BoardingTime = boardingTime,
@@ -209,7 +205,7 @@ namespace QuickstartFlightTickets
                     }
                 }
             };
-            
+
             flightsStub?.createFlightDesignator(flightDesignator);
             Console.WriteLine("Flight designator created: " +
                 $"{flightDesignator.CarrierCode}{flightDesignator.FlightNumber}");
@@ -269,7 +265,7 @@ namespace QuickstartFlightTickets
                     Month = 4,
                     Year = 2026,
                 },
-                
+
                 ScheduledArrivalTime = arrivalDateTime,
                 BoardingTime = boardingDateTime,
                 GateClosingTime = gateCloseDateTime,
@@ -299,7 +295,8 @@ namespace QuickstartFlightTickets
                 $"{flight.DepartureDate.Day}/{flight.DepartureDate.Month}/{flight.DepartureDate.Year}");
         }
 
-        private static void CreateBoardingPass() {
+        private static void CreateBoardingPass()
+        {
             //Create boarding pass
             Console.WriteLine("Creating boarding pass");
             BoardingPassRecord boardingPassRecord = new()
@@ -348,9 +345,9 @@ namespace QuickstartFlightTickets
                         {
                             InternationalDocVerification = InternationalDocVerification.Completed
                         },
-                        SsrCodes = {"INFT"},
+                        SsrCodes = { "INFT" },
                         // Add iOS 26 Capabilities to the pass record
-                        Capabilities = {PassengerCapabilities.PreBoarding},
+                        Capabilities = { PassengerCapabilities.PreBoarding },
                         // Optionally remove barcode from infant boarding pass
                         BarcodePayload = "nocode"
                     }
@@ -412,7 +409,7 @@ namespace QuickstartFlightTickets
             Console.WriteLine("Deleting airports");
             AirportCode departureAirport = new()
             {
-                AirportCode_ = departureAirportCode 
+                AirportCode_ = departureAirportCode
             };
             flightsStub?.deletePort(departureAirport);
             AirportCode arrivalAirport = new()

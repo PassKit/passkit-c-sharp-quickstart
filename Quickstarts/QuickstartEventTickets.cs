@@ -4,6 +4,8 @@ using PassKit.Grpc.DotNet.EventTickets;
 using Google.Protobuf.WellKnownTypes;
 using Quickstart.Common;
 using PassKit.Grpc.DotNet.Members;
+using System;
+using System.Threading;
 
 /* Quickstart Event Tickets runs through the high level steps required to create event tickets from scratch using the PassKit gRPC C Sharp SDK. 
  */
@@ -54,14 +56,8 @@ namespace QuickstartEventickets
             IssueEventTicket();
             ValidateTicket();
             RedeemTicket();
-            Console.WriteLine("Pausing to examine pass output. Press ESC to delete event ticket assets.");
-            do
-            {
-                while (!Console.KeyAvailable)
-                {
-                    // Do nothing
-                }
-            } while (Console.ReadKey(true).Key != ConsoleKey.Escape);
+            Console.WriteLine("Waiting 60 seconds before deleting event ticket assets...");
+            Thread.Sleep(TimeSpan.FromSeconds(60));
             DeleteEventAssets();
             // always close the channel when there will be no further calls made.
             channel.ShutdownAsync().Wait();
@@ -126,11 +122,11 @@ namespace QuickstartEventickets
 
         private static void CreateEvent()
         {
-            DateTime startDate = new (2028, 12, 12, 12, 0, 0, 0, DateTimeKind.Local);
+            DateTime startDate = new(2028, 12, 12, 12, 0, 0, 0, DateTimeKind.Local);
             startDate = DateTime.SpecifyKind(startDate, DateTimeKind.Utc);
-            DateTime endDate = new (2028, 12, 13, 13, 0, 0, 0, DateTimeKind.Local);
+            DateTime endDate = new(2028, 12, 13, 13, 0, 0, 0, DateTimeKind.Local);
             endDate = DateTime.SpecifyKind(endDate, DateTimeKind.Utc);
-            DateTime doorsOpen = new (2028, 12, 13, 12, 13, 0, 0, DateTimeKind.Local);
+            DateTime doorsOpen = new(2028, 12, 13, 12, 13, 0, 0, DateTimeKind.Local);
             doorsOpen = DateTime.SpecifyKind(doorsOpen, DateTimeKind.Utc);
 
             // Creates event
@@ -175,7 +171,7 @@ namespace QuickstartEventickets
 
         private static void IssueEventTicket()
         {
-            DateTime endDate = new (2028, 12, 13, 13, 0, 0, 0, DateTimeKind.Local);
+            DateTime endDate = new(2028, 12, 13, 13, 0, 0, 0, DateTimeKind.Local);
             endDate = DateTime.SpecifyKind(endDate, DateTimeKind.Utc);
             //Issue event ticket
             Console.WriteLine("Issuing event ticket");

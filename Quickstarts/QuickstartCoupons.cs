@@ -3,6 +3,8 @@ using Grpc.Net.Client;
 using PassKit.Grpc.DotNet.SingleUseCoupons;
 using PassKit.Grpc.DotNet;
 using Quickstart.Common;
+using System;
+using System.Threading;
 
 
 namespace QuickstartCoupons
@@ -45,24 +47,12 @@ namespace QuickstartCoupons
             CreateOffer();
             CreateCoupon();
             GetSingleCoupon(); //optional
-            Console.WriteLine("Pausing to examine pass output. Press ESC to redeem/void coupons, after which the passes will become unavailble.");
-            do
-            {
-                while (!Console.KeyAvailable)
-                {
-                    // Do nothing
-                }
-            } while (Console.ReadKey(true).Key != ConsoleKey.Escape);
+            Console.WriteLine("Waiting 60 seconds to allow you to view coupon");
+            Thread.Sleep(TimeSpan.FromSeconds(60));
             RedeemCoupon(); //optional
             VoidCoupon(); //optional
-            Console.WriteLine("Pausing to examine pass output. Press ESC to delete coupon campaign assets.");
-            do
-            {
-                while (!Console.KeyAvailable)
-                {
-                    // Do nothing
-                }
-            } while (Console.ReadKey(true).Key != ConsoleKey.Escape);
+            Console.WriteLine("Waiting 60 seconds before deleting coupon assets...");
+            Thread.Sleep(TimeSpan.FromSeconds(60));
             DeleteCampaign(); //optional
             // always close the channel when there will be no further calls made.
             channel.ShutdownAsync().Wait();
@@ -165,7 +155,7 @@ namespace QuickstartCoupons
                 {
                     Surname = "Loyal",
                     Forename = "Larry",
-                    DisplayName = "Larry",                                       
+                    DisplayName = "Larry",
                 },
                 Status = CouponStatus.Unredeemed
             };
@@ -184,7 +174,7 @@ namespace QuickstartCoupons
             coupon.Person.Surname = "Highroller";
             coupon.Person.Forename = "Harry";
             coupon.Person.DisplayName = "Harry";
-            
+
             vipCouponId = couponsStub?.createCoupon(coupon);
             Console.WriteLine("Created vip coupon, vip coupon id is " + vipCouponId?.Id_);
 
@@ -239,7 +229,7 @@ namespace QuickstartCoupons
             // Delete templates
             Console.WriteLine("Deleting templates");
             templatesStub!.deleteTemplate(baseTemplateId);
-            templatesStub!.deleteTemplate(vipTemplateId) ;
+            templatesStub!.deleteTemplate(vipTemplateId);
             Console.WriteLine("Deleted templates");
         }
     }

@@ -3,6 +3,9 @@ using PassKit.Grpc.DotNet;
 using PassKit.Grpc.DotNet.Members;
 using PassKit.Grpc.DotNet.SingleUseCoupons;
 using Quickstart.Common;
+using System;
+using System.Threading;
+
 
 namespace QuickstartLoyalty
 {
@@ -52,14 +55,8 @@ namespace QuickstartLoyalty
             CheckOutMember();  //optional
             AddPoints(); //optional
             BurnPoints(); //optional
-            Console.WriteLine("Pausing to examine pass output. Press ESC to delete loyalty assets.");
-            do
-            {
-                while (!Console.KeyAvailable)
-                {
-                    // Do nothing
-                }
-            } while (Console.ReadKey(true).Key != ConsoleKey.Escape);
+            Console.WriteLine("Waiting 60 seconds before deleting loyalty assets...");
+            Thread.Sleep(TimeSpan.FromSeconds(60));
             DeleteProgram(); //optional
             // always close the channel when there will be no further calls made.
             channel.ShutdownAsync().Wait();
@@ -179,7 +176,7 @@ namespace QuickstartLoyalty
             member.Person.Surname = "Highroller";
             member.Person.Forename = "Harry";
             member.Person.DisplayName = "Harry";
-     
+
             vipMemberId = membersStub?.enrolMember(member);
             Console.WriteLine($"Enrolled member on vip tier, member id is {vipMemberId?.Id_}");
 
