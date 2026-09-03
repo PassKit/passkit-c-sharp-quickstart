@@ -1,40 +1,58 @@
+using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using Grpc.Net.Client;
 using Quickstart.Common;
 
-namespace GrpcConnection
+namespace GrpcConnection;
+
+internal static class GrpcConnection
 {
-    class GrpcConnection
+    public static GrpcChannel ConnectWithPassKitServer()
     {
-        public static GrpcChannel ConnectWithPassKitServer()
-        {
-            var host = $"https://grpc.{Constants.Environment}.passkit.io"; // HTTPS scheme required
+        Constants.Validate();
+        var clientCertificate = LoadClientCertificate();
+        var handler = new HttpClientHandler();
+        handler.ClientCertificates.Add(clientCertificate);
+        handler.ServerCertificateCustomValidationCallback = ValidateServerCertificate;
 
-            try
-            {
-                // Load client certificate (requires .pfx file, see note below)
-                var clientCert = new X509Certificate2("certs/client.pfx", "", X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.Exportable);
+        return GrpcChannel.ForAddress(Constants.Address, new GrpcChannelOptions { HttpHandler = handler });
+    }
 
-                // Create HTTP handler with client certificate
-                var handler = new HttpClientHandler();
-                handler.ClientCertificates.Add(clientCert);
+    private static bool ValidateServerCertificate(
+        HttpRequestMessage _,
+        X509Certificate2? certificate,
+        X509Chain? __,
+        SslPolicyErrors errors
+    )
+    {
+        if (certificate is null) return false;
+        if (errors == SslPolicyErrors.None) return true;
+        if ((errors & ~SslPolicyErrors.RemoteCertificateChainErrors) != 0) return false;
 
-                // Optional: Skip server cert validation for local/dev (not recommended in prod)
-                handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+        var trustedCertificates = new X509Certificate2Collection();
+        trustedCertificates.ImportFromPemFile(Constants.RootCertificatePath);
+        using var customChain = new X509Chain();
+        customChain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
+        customChain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
+        customChain.ChainPolicy.CustomTrustStore.AddRange(trustedCertificates);
+        return customChain.Build(certificate);
+    }
 
-                var httpClient = new HttpClient(handler);
+    private static X509Certificate2 LoadClientCertificate()
+    {
+        if (Constants.UsesPkcs12)
+            return new X509Certificate2(
+                Constants.CertificatePath,
+                Constants.Passphrase,
+                X509KeyStorageFlags.Exportable
+            );
 
-                var channel = GrpcChannel.ForAddress(host, new GrpcChannelOptions
-                {
-                    HttpClient = httpClient
-                });
-
-                return channel;
-            }
-            catch (Exception e)
-            {
-                throw new Exception($"Failed to create gRPC channel with mutual TLS: {e.Message}", e);
-            }
-        }
+        return string.IsNullOrEmpty(Constants.Passphrase)
+            ? X509Certificate2.CreateFromPemFile(Constants.CertificatePath, Constants.PrivateKeyPath)
+            : X509Certificate2.CreateFromEncryptedPemFile(
+                Constants.CertificatePath,
+                Constants.Passphrase,
+                Constants.PrivateKeyPath
+            );
     }
 }

@@ -2,6 +2,9 @@
 bin/
 obj/
 certs/
+.env
+.env.*
+!.env.example
 *.user
 *.suo
 *.userosscache
@@ -16,3 +19,8 @@ artifacts/
 .idea/
 .vs/
 .vscode/
+
+# Test results and local coverage
+TestResults/
+coverage/
+*.trx

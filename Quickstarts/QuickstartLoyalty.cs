@@ -1,10 +1,7 @@
 using Grpc.Net.Client;
 using PassKit.Grpc.DotNet;
 using PassKit.Grpc.DotNet.Members;
-using PassKit.Grpc.DotNet.SingleUseCoupons;
 using Quickstart.Common;
-using System;
-using System.Threading;
 
 
 namespace QuickstartLoyalty
@@ -46,22 +43,22 @@ namespace QuickstartLoyalty
         public void Quickstart(GrpcChannel channel)
         {
             CreateStubs(channel);
-            CreateTemplate();
-            CreateProgram();
-            CreateTier();
-            EnrolMember();
-            GetMemberByExternalId();
-            CheckInMember(); //optional
-            CheckOutMember();  //optional
-            AddPoints(); //optional
-            BurnPoints(); //optional
-            Console.WriteLine("Waiting 60 seconds before deleting loyalty assets...");
-            Thread.Sleep(TimeSpan.FromSeconds(60));
-            DeleteProgram(); //optional
-            // always close the channel when there will be no further calls made.
-            channel.ShutdownAsync().Wait();
-
-
+            try
+            {
+                CreateTemplate();
+                CreateProgram();
+                CreateTier();
+                EnrolMember();
+                GetMemberByExternalId();
+                CheckInMember();
+                CheckOutMember();
+                AddPoints();
+                BurnPoints();
+            }
+            finally
+            {
+                if (!Constants.KeepAssets) DeleteProgram();
+            }
         }
         private static void CreateStubs(GrpcChannel channel)
         {
@@ -282,16 +279,12 @@ namespace QuickstartLoyalty
 
         private static void DeleteProgram()
         {
-            // Deletes program
-            Console.WriteLine("Deleting program");
-            membersStub?.deleteProgram(programId);
-            Console.WriteLine("Deleted program");
-
-            // Delete templates
-            Console.WriteLine("Deleting templates");
-            templatesStub!.deleteTemplate(baseTemplateId);
-            templatesStub!.deleteTemplate(vipTemplateId);
-            Console.WriteLine("Deleted templates");
+            if (programId is not null)
+                Cleanup.Try("program", () => membersStub!.deleteProgram(programId));
+            if (baseTemplateId is not null)
+                Cleanup.Try("base template", () => templatesStub!.deleteTemplate(baseTemplateId));
+            if (vipTemplateId is not null)
+                Cleanup.Try("VIP template", () => templatesStub!.deleteTemplate(vipTemplateId));
         }
     }
 }

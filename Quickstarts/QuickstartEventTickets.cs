@@ -1,11 +1,8 @@
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Net.Client;
 using PassKit.Grpc.DotNet;
 using PassKit.Grpc.DotNet.EventTickets;
-using Google.Protobuf.WellKnownTypes;
 using Quickstart.Common;
-using PassKit.Grpc.DotNet.Members;
-using System;
-using System.Threading;
 
 /* Quickstart Event Tickets runs through the high level steps required to create event tickets from scratch using the PassKit gRPC C Sharp SDK. 
  */
@@ -48,20 +45,21 @@ namespace QuickstartEventickets
         public void QuickStart(GrpcChannel channel)
         {
             CreateStubs(channel);
-            CreateTemplate();
-            CreateVenue();
-            CreateProduction();
-            CreateEvent();
-            CreateTicketType();
-            IssueEventTicket();
-            ValidateTicket();
-            RedeemTicket();
-            Console.WriteLine("Waiting 60 seconds before deleting event ticket assets...");
-            Thread.Sleep(TimeSpan.FromSeconds(60));
-            DeleteEventAssets();
-            // always close the channel when there will be no further calls made.
-            channel.ShutdownAsync().Wait();
-
+            try
+            {
+                CreateTemplate();
+                CreateVenue();
+                CreateProduction();
+                CreateEvent();
+                CreateTicketType();
+                IssueEventTicket();
+                ValidateTicket();
+                RedeemTicket();
+            }
+            finally
+            {
+                if (!Constants.KeepAssets) DeleteEventAssets();
+            }
         }
 
         private static void CreateStubs(GrpcChannel channel)
@@ -255,45 +253,16 @@ namespace QuickstartEventickets
 
         private static void DeleteEventAssets()
         {
-            // Delete the event and all associated tickets
-            Console.WriteLine("Deleting event");
-            Event req = new()
-            {
-                Id = eventId?.Id_
-            };
-            eventsStub?.deleteEvent(req);
-            Console.WriteLine("Deleted event");
-
-            // Delete Ticket Type
-            Console.WriteLine("Deleting ticket type");
-            TicketType ticketType = new()
-            {
-                Id = ticketTypeId?.Id_
-            };
-            eventsStub?.deleteTicketType(ticketType);
-
-            // Delete Production
-            Console.WriteLine("Deleting production");
-            Production production = new()
-            {
-                Id = productionId?.Id_
-            };
-            eventsStub?.deleteProduction(production);
-            Console.WriteLine("Deleted production");
-
-            // Delete Production
-            Console.WriteLine("Deleting venue");
-            Venue venue = new()
-            {
-                Id = venueId?.Id_
-            };
-            eventsStub?.deleteVenue(venue);
-            Console.WriteLine("Deleted venue");
-
-            // Delete template
-            Console.WriteLine("Deleting templates");
-            templatesStub!.deleteTemplate(templateId);
-            Console.WriteLine("Deleted templates");
+            if (eventId is not null)
+                Cleanup.Try("event", () => eventsStub!.deleteEvent(new Event { Id = eventId.Id_ }));
+            if (ticketTypeId is not null)
+                Cleanup.Try("ticket type", () => eventsStub!.deleteTicketType(new TicketType { Id = ticketTypeId.Id_ }));
+            if (productionId is not null)
+                Cleanup.Try("production", () => eventsStub!.deleteProduction(new Production { Id = productionId.Id_ }));
+            if (venueId is not null)
+                Cleanup.Try("venue", () => eventsStub!.deleteVenue(new Venue { Id = venueId.Id_ }));
+            if (templateId is not null)
+                Cleanup.Try("template", () => templatesStub!.deleteTemplate(templateId));
         }
     }
 }

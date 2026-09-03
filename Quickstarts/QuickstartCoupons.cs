@@ -1,10 +1,8 @@
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Net.Client;
-using PassKit.Grpc.DotNet.SingleUseCoupons;
 using PassKit.Grpc.DotNet;
+using PassKit.Grpc.DotNet.SingleUseCoupons;
 using Quickstart.Common;
-using System;
-using System.Threading;
 
 
 namespace QuickstartCoupons
@@ -42,20 +40,20 @@ namespace QuickstartCoupons
         public void Quickstart(GrpcChannel channel)
         {
             CreateStubs(channel);
-            CreateTemplate();
-            CreateCampaign();
-            CreateOffer();
-            CreateCoupon();
-            GetSingleCoupon(); //optional
-            Console.WriteLine("Waiting 60 seconds to allow you to view coupon");
-            Thread.Sleep(TimeSpan.FromSeconds(60));
-            RedeemCoupon(); //optional
-            VoidCoupon(); //optional
-            Console.WriteLine("Waiting 60 seconds before deleting coupon assets...");
-            Thread.Sleep(TimeSpan.FromSeconds(60));
-            DeleteCampaign(); //optional
-            // always close the channel when there will be no further calls made.
-            channel.ShutdownAsync().Wait();
+            try
+            {
+                CreateTemplate();
+                CreateCampaign();
+                CreateOffer();
+                CreateCoupon();
+                GetSingleCoupon();
+                RedeemCoupon();
+                VoidCoupon();
+            }
+            finally
+            {
+                if (!Constants.KeepAssets) DeleteCampaign();
+            }
         }
         private static void CreateStubs(GrpcChannel channel)
         {
@@ -221,16 +219,12 @@ namespace QuickstartCoupons
 
         private static void DeleteCampaign()
         {
-            // Deletes campaign, offers, and associated passes 
-            Console.WriteLine("Deleting campaign");
-            couponsStub?.deleteCouponCampaign(campaignId);
-            Console.WriteLine("Deleted campaign");
-
-            // Delete templates
-            Console.WriteLine("Deleting templates");
-            templatesStub!.deleteTemplate(baseTemplateId);
-            templatesStub!.deleteTemplate(vipTemplateId);
-            Console.WriteLine("Deleted templates");
+            if (campaignId is not null)
+                Cleanup.Try("campaign", () => couponsStub!.deleteCouponCampaign(campaignId));
+            if (baseTemplateId is not null)
+                Cleanup.Try("base template", () => templatesStub!.deleteTemplate(baseTemplateId));
+            if (vipTemplateId is not null)
+                Cleanup.Try("VIP template", () => templatesStub!.deleteTemplate(vipTemplateId));
         }
     }
 }

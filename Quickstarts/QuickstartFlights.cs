@@ -1,9 +1,8 @@
+using Grpc.Core;
 using Grpc.Net.Client;
 using PassKit.Grpc.DotNet;
 using PassKit.Grpc.DotNet.Flights;
 using Quickstart.Common;
-using System;
-using System.Threading;
 
 /* Quickstart Flight Tickets runs through the high level steps required to create flight tickets from scratch using the PassKit gRPC Java SDK. 
  */
@@ -21,13 +20,19 @@ namespace QuickstartFlightTickets
 
         private static Flights.FlightsClient? flightsStub;
         private static Templates.TemplatesClient? templatesStub;
-        private static readonly string carrierCode = "PP";
-        private static readonly string departureAirportCode = "DUB";
-        private static readonly string departureICAOAirportCode = "EIDW";
-        private static readonly string arrivalAirportCode = "BKK";
-        private static readonly string arrivalICAOAirportCode = "VTBS";
-        private static readonly string flightNumber = "888";
+        private static readonly string carrierCode = "YY";
+        private static readonly string departureAirportCode = "YY4";
+        private static readonly string departureICAOAirportCode = "YYYY";
+        private static readonly string arrivalAirportCode = "ADP";
+        private static readonly string arrivalICAOAirportCode = "YYYA";
+        private static readonly string flightNumber = Random.Shared.Next(1000, 9999).ToString();
         private static readonly int sequenceNumber = 88;
+        private static readonly DateTime departureDate = DateTime.UtcNow.Date.AddDays(7);
+        private static bool ownsCarrier;
+        private static bool ownsDeparturePort;
+        private static bool ownsArrivalPort;
+        private static bool ownsFlight;
+        private static bool ownsFlightDesignator;
 
         /*
          * Quickstart will walk through the following steps:
@@ -54,16 +59,19 @@ namespace QuickstartFlightTickets
                 return;
             }
             CreateStubs(channel);
-            CreateTemplates();
-            CreateCarrier();
-            CreateAirports();
-            CreateFlight();
-            CreateFlightDesignator();
-            CreateBoardingPass();
-            Console.WriteLine("Waiting 60 seconds before deleting flights assets...");
-            Thread.Sleep(TimeSpan.FromSeconds(60));
-            // always close the channel when there will be no further calls made.
-            channel.ShutdownAsync().Wait();
+            try
+            {
+                CreateTemplates();
+                CreateCarrier();
+                CreateAirports();
+                CreateFlight();
+                CreateFlightDesignator();
+                CreateBoardingPass();
+            }
+            finally
+            {
+                if (!Constants.KeepAssets) DeleteFlightAssets();
+            }
         }
 
         private static void CreateStubs(GrpcChannel channel)
@@ -117,13 +125,11 @@ namespace QuickstartFlightTickets
                 CountryCode = "IE",
                 Timezone = "Europe/Dublin",
                 // Set iOS 26 text for documents verified badge
-                DocumentsVerifiedText = "Cleared To Travel",
-                // Display a lounge map in the service section
-                LoungeId = "I64D552175CB4497F"
+                DocumentsVerifiedText = "Cleared To Travel"
             };
             departureAirport.SecurityPrograms.Add(securityPrograms);
 
-            flightsStub?.createPort(departureAirport);
+            ownsDeparturePort = TryCreatePort(departureAirport);
             Console.WriteLine($"Departure airport created: {departureAirport.IataAirportCode}");
 
             //Creates arrival airport
@@ -139,9 +145,23 @@ namespace QuickstartFlightTickets
             };
             arrivalAirport.SecurityPrograms.Add(securityPrograms);
 
-            flightsStub?.createPort(arrivalAirport);
+            ownsArrivalPort = TryCreatePort(arrivalAirport);
             Console.WriteLine($"Arrival airport created: {arrivalAirport.IataAirportCode}");
 
+        }
+
+        private static bool TryCreatePort(Port port)
+        {
+            try
+            {
+                flightsStub?.createPort(port);
+                return true;
+            }
+            catch (RpcException exception) when (exception.StatusCode == StatusCode.AlreadyExists)
+            {
+                Console.WriteLine($"Airport {port.IataAirportCode} already exists; reusing it.");
+                return false;
+            }
         }
 
         private static void CreateCarrier()
@@ -155,7 +175,15 @@ namespace QuickstartFlightTickets
                 PassTypeIdentifier = Constants.AppleCertificate
             };
 
-            flightsStub?.createCarrier(carrier);
+            try
+            {
+                flightsStub?.createCarrier(carrier);
+                ownsCarrier = true;
+            }
+            catch (RpcException exception) when (exception.StatusCode == StatusCode.AlreadyExists)
+            {
+                Console.WriteLine($"Carrier {carrierCode} already exists; reusing it.");
+            }
             Console.WriteLine($"Carrier created: {carrier.IataCarrierCode}");
         }
 
@@ -207,6 +235,7 @@ namespace QuickstartFlightTickets
             };
 
             flightsStub?.createFlightDesignator(flightDesignator);
+            ownsFlightDesignator = true;
             Console.WriteLine("Flight designator created: " +
                 $"{flightDesignator.CarrierCode}{flightDesignator.FlightNumber}");
 
@@ -218,19 +247,19 @@ namespace QuickstartFlightTickets
 
             LocalDateTime flightDateTime = new()
             {
-                DateTime = "2026-04-28T18:00:00"
+                DateTime = departureDate.AddHours(18).ToString("yyyy-MM-dd'T'HH:mm:ss")
             };
             LocalDateTime arrivalDateTime = new()
             {
-                DateTime = "2026-04-29T14:20:00"
+                DateTime = departureDate.AddDays(1).AddHours(14).AddMinutes(20).ToString("yyyy-MM-dd'T'HH:mm:ss")
             };
             LocalDateTime boardingDateTime = new()
             {
-                DateTime = "2026-04-28T17:20:00"
+                DateTime = departureDate.AddHours(17).AddMinutes(20).ToString("yyyy-MM-dd'T'HH:mm:ss")
             };
             LocalDateTime gateCloseDateTime = new()
             {
-                DateTime = "2026-04-28T17:50:00"
+                DateTime = departureDate.AddHours(17).AddMinutes(50).ToString("yyyy-MM-dd'T'HH:mm:ss")
             };
 
             Flight flight = new()
@@ -261,9 +290,9 @@ namespace QuickstartFlightTickets
                 },
                 DepartureDate = new Date
                 {
-                    Day = 28,
-                    Month = 4,
-                    Year = 2026,
+                    Day = departureDate.Day,
+                    Month = departureDate.Month,
+                    Year = departureDate.Year,
                 },
 
                 ScheduledArrivalTime = arrivalDateTime,
@@ -291,6 +320,7 @@ namespace QuickstartFlightTickets
             };
 
             flightsStub?.createFlight(flight);
+            ownsFlight = true;
             Console.WriteLine($"Created flight: {flight.CarrierCode}{flight.FlightNumber} " +
                 $"{flight.DepartureDate.Day}/{flight.DepartureDate.Month}/{flight.DepartureDate.Year}");
         }
@@ -314,9 +344,9 @@ namespace QuickstartFlightTickets
                 },
                 DepartureDate = new Date
                 {
-                    Day = 28,
-                    Month = 4,
-                    Year = 2026,
+                    Day = departureDate.Day,
+                    Month = departureDate.Month,
+                    Year = departureDate.Year,
                 },
                 Class = "Economy",
                 Passenger = new Passenger
@@ -387,14 +417,14 @@ namespace QuickstartFlightTickets
                 DeplaningPoint = arrivalAirportCode,
                 DepartureDate = new Date
                 {
-                    Day = 28,
-                    Month = 4,
-                    Year = 2026,
+                    Day = departureDate.Day,
+                    Month = departureDate.Month,
+                    Year = departureDate.Year,
                 }
 
             };
-            flightsStub?.deleteFlight(flightRequest);
-            Console.WriteLine("Flight deleted");
+            if (ownsFlight)
+                Cleanup.Try("flight", () => flightsStub!.deleteFlight(flightRequest));
 
             Console.WriteLine("Deleting flight designator");
             FlightDesignatorRequest flightDesignator = new()
@@ -403,33 +433,22 @@ namespace QuickstartFlightTickets
                 FlightNumber = flightNumber,
                 Revision = 1
             };
-            flightsStub?.deleteFlightDesignator(flightDesignator);
-            Console.WriteLine("Deleted flight designator");
+            if (ownsFlightDesignator)
+                Cleanup.Try("flight designator", () => flightsStub!.deleteFlightDesignator(flightDesignator));
 
             Console.WriteLine("Deleting airports");
-            AirportCode departureAirport = new()
-            {
-                AirportCode_ = departureAirportCode
-            };
-            flightsStub?.deletePort(departureAirport);
-            AirportCode arrivalAirport = new()
-            {
-                AirportCode_ = arrivalAirportCode
-            };
-            flightsStub?.deletePort(arrivalAirport);
-            Console.WriteLine("Deleted airports");
+            if (ownsDeparturePort)
+                Cleanup.Try("departure airport", () => flightsStub!.deletePort(new AirportCode { AirportCode_ = departureAirportCode }));
+            if (ownsArrivalPort)
+                Cleanup.Try("arrival airport", () => flightsStub!.deletePort(new AirportCode { AirportCode_ = arrivalAirportCode }));
 
             Console.WriteLine("Deleting carrier");
-            CarrierCode carrier = new()
-            {
-                CarrierCode_ = carrierCode
-            };
-            flightsStub?.deleteCarrier(carrier);
-            Console.WriteLine("Deleted Carrier");
+            if (ownsCarrier)
+                Cleanup.Try("carrier", () => flightsStub!.deleteCarrier(new CarrierCode { CarrierCode_ = carrierCode }));
 
             Console.WriteLine("Deleting template");
-            templatesStub?.deleteTemplate(templateId);
-            Console.WriteLine("Deleted template");
+            if (templateId is not null)
+                Cleanup.Try("template", () => templatesStub!.deleteTemplate(templateId));
         }
     }
 }

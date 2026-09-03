@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+          cache: true
+          cache-dependency-path: c-sharp-quickstart.csproj
+      - run: dotnet restore c-sharp-quickstart.csproj
+      - run: dotnet restore Tests/c-sharp-quickstart.Tests.csproj
+      - run: dotnet build c-sharp-quickstart.csproj --configuration Release --no-restore
+      - run: dotnet test Tests/c-sharp-quickstart.Tests.csproj --configuration Release --no-restore
+      - run: dotnet format c-sharp-quickstart.csproj --verify-no-changes --no-restore
+      - run: dotnet list c-sharp-quickstart.csproj package --vulnerable --include-transitive
